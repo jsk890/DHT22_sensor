@@ -3,7 +3,7 @@ from flask import Flask, render_template
 #from gpiozero
 
 app = Flask(__name__)
-
+# modify by Kimjs 22/06/22 17:38
 @app.route('/')
 def index():
     sensor = dht.DHT22
