@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+	<head> 
+	<meta charset="utf-8">
+
+	<title>RASPBERRY PI STATE VIEWER</title>
+	<meta name="viewport" content="width=device-width initial-scale=1">
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.css" />
+	<script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+
+	<!--1초마다 웹사이트 새로고침을 하여 라즈베리파이의 상태를 갱신-->
+	<meta http-equiv="refresh" content="5">
+	</head> 
+	
+	<body>
+		<h1>KRICT BMS</h1>
+        <hr>
+        	<!-- 새로고침으로 데이 갱신 하는 경우-->
+        <h3> 새로고침 처리 </h3>
+        <p> - 각각의 스위치 상태</p>
+		<div style="padding-left:20px;">
+			
+				<p style="color: blue;">
+					<b>파란 스위치: {% if sw_state_list[0]!=0 %} 켜짐 
+                                    {% elif sw_state_list[0]==0 %} 꺼짐
+                                    {% endif %}
+					</b>	
+				</p>
+				<p style="color: green;">
+					<b>초록 스위치: {% if sw_state_list[1]!=0 %} 켜짐 
+                                    {% elif sw_state_list[1]==0 %} 꺼짐
+                                    {% endif %}
+					</b>	
+				</p>
+
+            <hr>
+		</div>
+		<!-- ajax 요청으로 새로고침 없이 데이터 갱신 하는 경우 -->
+	<h3> ajax 비동기 처리 </h3>
+	<p> - 서버로 값 전달 후 json으로 받아와 표시 </p>
+	<input type="text" id="txt1" name="inputdata"></input>
+	<button id="btn1">submit</button>
+	<div id="result1"></div>
+	<p> - 주기적으로 센서값 json 요청 (200ms)</p>
+	<form>
+		<p>The button is <span id="buttonState" style="color: red;"></span></p>
+	</form>
+	
+
+	</body>
+	
+			<script type=text/javascript>
+	$( "#btn1" ).click(function() {
+		//input 요소의 value에 접근하여 저장
+		var txt1_v = $('#txt1').val();
+		// 서버로 보낼 json 형식 데이터
+		var postdata = {
+			'inputdata':txt1_v
+		}
+		$.ajax({
+			type: 'POST',
+			// ajax 경로
+			url: '{{url_for("ajax_page")}}',
+			// 서버로 보낼 데이터 꾸러미 형식
+			data: JSON.stringify(postdata),
+			// 데이터 타입 지정
+			dataType : 'JSON',
+			contentType: "application/json",
+			// 서버로 부터 받은 데이터 result1 요소로 value 전달
+			success: function(data){
+				$("#result1").text("result:"+data['inputdata'] + '=' + data['rlt']);
+			},
+			// 데이터 송수신 문제 발생 시 브라우저에 경고창 출력
+			error: function(request, status, error){
+				alert('ajax error:['+status+']['+error+']')
+			}
+		})
+	});
+	
+	
+	$(
+    // 주기적으로 버튼 상태를 얻기 위한 ajax요한 요청 (200ms)
+    // span tag에 상태 반영하여 수정
+    // 상태 text는 서버에 의해 JSON 스트링 으로 반환
+    function button() 
+    {
+		// 연결할 ajax url
+        $.getJSON('/_button', function(data)
+            {
+                $("#buttonState").text(data.buttonState);
+                // 서버로 button() 함수 주기적으로 실행 요청
+                setTimeout(function(){
+					console.log(' _button 호출');
+					button();
+					},200);
+            });
+    }
+    );
+
+	</script>
+</html>
