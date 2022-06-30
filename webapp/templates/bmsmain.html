@@ -6,10 +6,22 @@
 	<title>RASPBERRY PI STATE VIEWER</title>
 	<meta name="viewport" content="width=device-width initial-scale=1">
 	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.css" />
+	<!--javascript 사용 라이브러리-->
 	<script src="https://code.jquery.com/jquery-3.5.0.js"></script>
-
+	<!--chartjs 사용 라이브러리-->
+	<!-- 공식 사이트 url : https://www.chartjs.org/-->
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+	<style>
+	.chartContainer{
+		width : 500px;
+		height: 260px;
+		border: 1px solid #555;
+		padding : 10px;
+		border-radius:8px;
+	}
+	</style>
 	<!--1초마다 웹사이트 새로고침을 하여 라즈베리파이의 상태를 갱신-->
-	<!--<meta http-equiv="refresh" content="5">-->
+	<!--<meta http-equiv="refresh" content="3600">-->
 	</head> 
 	
 	<body>
@@ -26,11 +38,37 @@
 		<p>Humidity <span id="buttonState" style="color: red;"></span></p>
 		<p>Temperature <span id="tem" style="color: blue;"></span></p>
 	</form>
+	<div class="chartContainer">
+		<canvas id="lineChart" ></canvas>
+	</div>
 	
-
+	
 	</body>
 	
-			<script type=text/javascript>
+	<script type=text/javascript>
+	var mychart = $('#lineChart');
+	var myLineChart = new Chart(mychart,{
+		type: 'line',
+		data:{
+			labels:[
+			'1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월',],
+			datasets:
+			[
+			{
+				label : 'Temperature - Room1',
+				data:[10,8,6,5,12,7,16,7,6,10,12,10]
+			},
+			{
+				label : 'Humidity - Room1',
+				data:[2,17,5,9,4,5,15,7,2,13,8,7]
+			}
+			]}
+		});
+	
+	
+	
+			
+	
 	$( "#btn1" ).click(function() {
 		//input 요소의 value에 접근하여 저장
 		var txt1_v = $('#txt1').val();
