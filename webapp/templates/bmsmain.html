@@ -20,7 +20,7 @@
 		border-radius:8px;
 	}
 	</style>
-	<!--1초마다 웹사이트 새로고침을 하여 라즈베리파이의 상태를 갱신-->
+	<!--3600초(1시간)마다 웹사이트 새로고침을 하여 라즈베리파이의 상태를 갱신-->
 	<!--<meta http-equiv="refresh" content="3600">-->
 	</head> 
 	
@@ -35,7 +35,7 @@
 	<div id="result1"></div>
 	<p> - 주기적으로 센서값 json 요청 (200ms)</p>
 	<form>
-		<p>Humidity <span id="buttonState" style="color: red;"></span></p>
+		<p>Humidity <span id="hum" style="color: red;"></span></p>
 		<p>Temperature <span id="tem" style="color: blue;"></span></p>
 	</form>
 	<div class="chartContainer">
@@ -123,7 +123,7 @@
 		// 연결할 ajax url
         $.getJSON('/_callHT', function(data)
             {
-                $("#buttonState").text(data.buttonState);
+                $("#hum").text(data.hum);
                 $("#tem").text(data.tem);
                 // 서버로 button() 함수 주기적으로 실행 요청
                 setTimeout(function(){
