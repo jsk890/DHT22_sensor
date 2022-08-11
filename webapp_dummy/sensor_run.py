@@ -4,9 +4,9 @@ import board
 import csv
 #import json
 from os import path
-#pip3 install adafruit-circuitpython-dht 설치 필요
+#need to install 'pip3 install adafruit-circuitpython-dht'
 import adafruit_dht
-#flask 설치 필요
+#need to install 'flask'
 from flask import Flask, request, jsonify, render_template
 import RPi.GPIO as GPIO 
 
@@ -61,7 +61,7 @@ def callHT():
                 nowtime = ("%02d:%02d:%02d" % (now.tm_hour, now.tm_min, now.tm_sec)) 
 
                 #print('Temp: {0:}*C  Humid: {1:}%  {2:} {3:}'.format(temp, humid, nowdate, nowtime))
-                return jsonify(buttonState=humid, tem=temp)
+                return jsonify(hum=humid, tem=temp)
                 #print('Temp: {0:0.1f}*C Humid: {1:0.1f}% {2:}-{3:}-{4:} {5:}:{6:}:{7:}'.\
                     #format(temp, humid, \
                     #time.strftime("%Y"), time.strftime("%m"), time.strftime("%d"), \
@@ -70,11 +70,11 @@ def callHT():
     except RuntimeError as error:
         humid = '-'
         temp = '-'
-        return jsonify(buttonState=humid, tem=temp)
+        return jsonify(hum=humid, tem=temp)
     except Exception as error:
         humid = '-'
         temp = '-'
-        return jsonify(buttonState=humid, tem=temp)
+        return jsonify(hum=humid, tem=temp)
 #   time.sleep(5) # time interval
 
 
