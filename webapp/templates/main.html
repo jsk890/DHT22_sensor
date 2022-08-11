@@ -1,0 +1,145 @@
+<!doctype html>
+<html>
+    <head> 
+        <meta charset="utf-8">
+        <!-- main page title -->
+        <title>RASPBERRY PI STATE VIEWER</title>
+        <!-- javascript library -->
+	    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+        <!-- chartjs library -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+        <!-- CSS -->
+        <style>
+            .chartContainer{
+                width : 500px;
+                height: 260px;
+                border: 1px solid #555;
+                padding : 10px;
+                border-radius:8px;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- system name -->
+        <h1>KRICT LAB Web Manager </h1> <hr>
+
+        <!-- print tem & hum -->
+        <form>
+            <p>Temperature: <span id="tem" style="color: blue;"></span> *C</p>
+            <p>Humidity: <span id="hum" style="color: red;"></span> %</p>
+        </form>
+
+        <!-- print temp chart -->
+        <div class="chartContainer">
+            <canvas id="tempChart" ></canvas>
+        </div>
+
+        <!-- print humid chart -->
+        <div class="chartContainer">
+            <canvas id="humidChart" ></canvas>
+        </div>
+
+        <!-- javascript -->
+        <script type=text/javascript>
+        var tem;
+        var hum;
+        var humDataList = [];
+        var temDataList = [];
+
+        //chart val
+        var tempChart = $('#tempChart');
+        var humidChart = $('#humidChart');
+        //rendering temp chart
+        var tempChart = tempChart = new Chart(tempChart,{
+            type: 'line',
+            data:{
+                labels: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,'현재'],
+                datasets:
+                [{
+                    label : 'Temperature - Room1',
+                }]},
+            options:{
+                    responsive: true,
+                    scales:{
+                        y:{
+                            suggestedMin:21,
+                            suggestedMax:28,
+                            ticks:{
+                                stepSize:0.2
+                            }
+                        }
+                    }
+                }
+            });
+
+        //rendering humid chart
+        var humidChart = humidChart = new Chart(humidChart,{
+            type: 'line',
+            data:{
+                labels: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,'현재'],
+                datasets:
+                [
+                {
+                    label : 'Humidity - Room1',
+                }
+                ]},
+            options:{
+                responsive: true,
+                scales:{
+                    y:{
+                        suggestedMin:60,
+                        suggestedMax:85,
+                        ticks:{
+                            stepSize:1
+                        }
+                    }
+                }
+            }
+            });
+
+        // call HT data from server
+        $(function callHT()
+        {
+            // ajax url
+            $.getJSON('/callHT', function(data)
+            {
+                $("#hum").text(data.hum);
+                $("#tem").text(data.tem);
+                hum = Number(data.hum);
+                tem = Number(data.tem);
+                if(!isNaN(hum) && !isNaN(tem)){
+                    
+                    if (humDataList.length <= 20 && temDataList.length <= 20) {
+                        humDataList[humDataList.length-1] = hum;
+                        temDataList[temDataList.length-1] = tem;
+                        humDataList.length++;
+                        temDataList.length++;
+                    }
+                    else{
+                        for (let index = 0; index < humDataList.length - 1; index++) {
+                            humDataList[index] = humDataList[index + 1];
+                            temDataList[index] = temDataList[index + 1];
+                            humDataList[humDataList.length-1] = hum;
+                            temDataList[temDataList.length-1] = tem;
+
+                        }
+                    }
+                }
+                tempChart.data.datasets[0].data = temDataList;
+                humidChart.data.datasets[0].data = humDataList;
+                tempChart.update();
+                humidChart.update();
+
+                setTimeout(function(){
+					callHT();
+					},200);
+                });
+        }
+        );
+
+
+        
+
+        </script>
+    </body>
+</html>
