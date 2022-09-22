@@ -15,13 +15,16 @@ import csv
 now = time.localtime()
 today = ("%04d-%02d-%02d" % (now.tm_year, now.tm_mon, now.tm_mday))
 
-# csv file path
+# csv file save folder, current save folder is '/home/pi/dev/DHT22_sensor_log/'
+# you can change the context in '' for fpath in order to change csv file save folder.
 fpath = '/home/pi/dev/DHT22_sensor/log/'
+
+# csv file name
 location = 'Tr_Room'
 fname = fpath + location + '_' + today + '.csv'
 
-# csv file: first row generation
-# label: Date | Time | Temp(*C) | Humid(%) | dTemp(*C) | dHumid(%) | Cal. Temp(*C) | Cal. Humid (%) | Cal. Msg
+# csv file: title row generation
+# title label: Date | Time | Temp(*C) | Humid(%) | dTemp(*C) | dHumid(%) | Cal. Temp(*C) | Cal. Humid (%) | Cal. Msg
 if path.exists(fname)==False:
     with open(fname, "w") as f:
         wr = csv.writer(f, delimiter=",", lineterminator='\n')
@@ -60,8 +63,8 @@ while True:
                 nowdate = ("%04d-%02d-%02d" % (now.tm_year, now.tm_mon, now.tm_mday)) 
                 nowtime = ("%02d:%02d:%02d" % (now.tm_hour, now.tm_min, now.tm_sec)) 
 
-                # print on screen
-                print('Temp(raw): {0:}*C  Humid(raw): {1:}%  {2:} {3:}'.format(temp, humid, nowdate, nowtime))
+                # print on screen -> skip for multi py run
+                # print('Temp(raw): {0:}*C  Humid(raw): {1:}%  {2:} {3:}'.format(temp, humid, nowdate, nowtime))
 
                 # data list
                 data = []
@@ -84,10 +87,12 @@ while True:
         time.sleep(5)
 
     except RuntimeError as error: # runtime error case
-        print(error.args[0])
+        # print error -> skip for multi py run
+        # print(error.args[0])
         time.sleep(5)
         continue
     except Exception as error: # reading sensor error case
         dhtDevice.exit()
-        raise error
+        # raise error -> skip for multi py run
+        # raise error
 
