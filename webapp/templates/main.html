@@ -11,10 +11,10 @@
         <!-- CSS -->
         <style>
             .chartContainer{
-                width : 500px;
+                width : 550px;
                 height: 260px;
                 border: 1px solid #555;
-                padding : 10px;
+                padding : 10px 10px 30px 10px;
                 border-radius:8px;
             }
         </style>
@@ -25,6 +25,7 @@
 
         <!-- print tem & hum -->
         <form>
+            <p><span id="date" style="color: black;"></span></p>
             <p>Temperature: <span id="tem" style="color: blue;"></span> *C</p>
             <p>Humidity: <span id="hum" style="color: red;"></span> %</p>
         </form>
@@ -43,8 +44,10 @@
         <script type=text/javascript>
         var tem;
         var hum;
-        var humDataList = [];
-        var temDataList = [];
+        var time;
+        var humDataList = new Array(20);
+        var temDataList = new Array(20);
+        var timeDataList = new Array(20).fill('');
 
         //chart val
         var tempChart = $('#tempChart');
@@ -53,22 +56,48 @@
         var tempChart = tempChart = new Chart(tempChart,{
             type: 'line',
             data:{
-                labels: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,'현재'],
+                labels: timeDataList,
                 datasets:
                 [{
-                    label : 'Temperature - Room1',
-                }]},
+                }],
+            },
+                
             options:{
-                    responsive: true,
-                    scales:{
-                        y:{
-                            suggestedMin:21,
-                            suggestedMax:28,
-                            ticks:{
-                                stepSize:0.2
-                            }
+
+                responsive: true,
+                scales:{
+                    x:{
+                        title:{
+                            display:true,
+                            align : 'center',
+                            text:'Time'
+                        },
+                    },
+                    y:{
+                        title:{
+                            display:true,
+                            text:'Temperature (°C)'
+                        },
+                        suggestedMin:21,
+                        suggestedMax:28,
+                        ticks:{
+                            stepSize:0.2
                         }
                     }
+                },
+                plugins: {
+                    title: {
+                        text: 'Temperature',
+                        display: true,
+                        font:{
+                            size:24,
+                        }
+                    },
+                    legend:{
+                        display:false
+                    },
+                },
+                animation : false
                 }
             });
 
@@ -76,25 +105,47 @@
         var humidChart = humidChart = new Chart(humidChart,{
             type: 'line',
             data:{
-                labels: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,'현재'],
+                labels: timeDataList,
                 datasets:
-                [
-                {
-                    label : 'Humidity - Room1',
-                }
-                ]},
+                [{
+                }]
+            },
             options:{
                 responsive: true,
                 scales:{
+                    x:{
+                        title:{
+                            display:true,
+                            align : 'center',
+                            text:'Time '
+                        },
+                    },
                     y:{
-                        suggestedMin:60,
+                        title:{
+                                display:true,
+                                text:'Humidity (%)',
+                            },
+                        suggestedMin:40,
                         suggestedMax:85,
                         ticks:{
                             stepSize:1
                         }
                     }
+                },
+                plugins: {
+                    title: {
+                        text: 'Humidity',
+                        display: true,
+                        font:{
+                            size:24,
+                        }
+                    },
+                    legend:{
+                        display:false
+                    },
+                },
+                animation : false
                 }
-            }
             });
 
         // call HT data from server
@@ -105,34 +156,46 @@
             {
                 $("#hum").text(data.hum);
                 $("#tem").text(data.tem);
+                $("#date").text(data.date);
                 hum = Number(data.hum);
                 tem = Number(data.tem);
+                time = data.time;
+                // if data type is only number
                 if(!isNaN(hum) && !isNaN(tem)){
-                    
+
+                    // resizing the array and fill data
                     if (humDataList.length <= 20 && temDataList.length <= 20) {
                         humDataList[humDataList.length-1] = hum;
                         temDataList[temDataList.length-1] = tem;
+                        timeDataList[timeDataList.length-1] = time;
                         humDataList.length++;
                         temDataList.length++;
+                        timeDataList.length++;
+                        
                     }
+                    // shifting array data
                     else{
                         for (let index = 0; index < humDataList.length - 1; index++) {
                             humDataList[index] = humDataList[index + 1];
                             temDataList[index] = temDataList[index + 1];
+                            timeDataList[index] = timeDataList[index + 1];
                             humDataList[humDataList.length-1] = hum;
                             temDataList[temDataList.length-1] = tem;
+                            timeDataList[timeDataList.length-1] = time;
 
                         }
                     }
                 }
                 tempChart.data.datasets[0].data = temDataList;
+                tempChart.data.labels.data = timeDataList;
                 humidChart.data.datasets[0].data = humDataList;
+                humidChart.data.labels.data = timeDataList;
                 tempChart.update();
                 humidChart.update();
 
                 setTimeout(function(){
 					callHT();
-					},200);
+					},100);
                 });
         }
         );
