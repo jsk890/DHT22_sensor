@@ -1,8 +1,8 @@
-''' --------------------------------
+''' -------------------------------------------------
 AM2302 DHT22 (updated module compatible with RasPi 4)
 Humidity & Temperature Sensor Logger
 by hgstyler on Python
--------------------------------- '''
+------------------------------------------------- '''
 
 import sys
 import board
@@ -10,6 +10,10 @@ import adafruit_dht # pip3 install adafruit-circuitpython-dht
 from os import path
 import time
 import csv
+
+# assign initial value for previous temp, humid
+prevhumid = -99.9
+prevtemp = -99.9
 
 # sensor read loop
 while True:
@@ -34,10 +38,16 @@ while True:
 
         # data list generation for csv
         if humidity is not None and temperature is not None: # read failure check
-            if humidity < 100.1: # out of range in humidity check
+            if humidity < 100.1: # out of range in humid check
                 # humid & temp for data list
                 humid = round(humidity, 1)
                 temp = round(temperature, 1)
+
+                # out of normal range in temp, humid
+                if prevhumid != -99.9 and abs(humid - prevhumid) >= 10.0:
+                    continue
+                if prevtemp != -99.9 and abs(temp - prevtemp) >= 5.0:
+                    continue
 
                 dt = 0; dh = 0
                 calibrated_temp = temp + dt; calibrated_humid = humid + dh
@@ -87,7 +97,11 @@ while True:
                     with open(fname, "a") as f:
                         wr = csv.writer(f, delimiter=",", lineterminator='\n')
                         wr.writerow(data)
-        
+
+                #previous temp, humid
+                prevtemp = temp
+                prevhumid = humid
+
         # wait 5 sec for next loop
         time.sleep(5)
 
