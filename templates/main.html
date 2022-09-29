@@ -61,6 +61,8 @@
         var tem;
         var hum;
         var time;
+        var prevTem=-1;
+        var prevHum=-1;
 
         // 120 ≒ 1 min 
         var graphTableSize = 240;
@@ -300,52 +302,60 @@
                 hum = Number(data.hum);
                 tem = Number(data.tem);
                 time = data.time;
+
                 // if data type is only number
                 if(!isNaN(hum) && !isNaN(tem)){
-
-                    // resizing the array and filling data
-                    if (humDataList.length <= graphTableSize && temDataList.length <= graphTableSize) {
-                        humDataList[humDataList.length-1] = hum;
-                        temDataList[temDataList.length-1] = tem;
-                        timeDataList[timeDataList.length-1] = time;
-                        humDataList.length++;
-                        temDataList.length++;
-                        timeDataList.length++;
-                        
-                    }
-                    // shifting array data
-                    else{
-                        for (let index = 0; index < humDataList.length - 1; index++) {
-                            humDataList[index] = humDataList[index + 1];
-                            temDataList[index] = temDataList[index + 1];
-                            timeDataList[index] = timeDataList[index + 1];
+                    if((prevTem != -1 ) && (Math.abs(tem - prevTem) >= 5)) {
+                        //continue
+                    }if((prevHum != -1 ) && (Math.abs(hum - prevHum) >= 10)) {
+                        //continue
+                    }else{
+                        prevTem = tem;
+                        prevHum = hum;
+                        // resizing the array and filling data
+                        if (humDataList.length <= graphTableSize && temDataList.length <= graphTableSize) {
                             humDataList[humDataList.length-1] = hum;
                             temDataList[temDataList.length-1] = tem;
                             timeDataList[timeDataList.length-1] = time;
-
+                            humDataList.length++;
+                            temDataList.length++;
+                            timeDataList.length++;
+                            
                         }
-                    }
+                        // shifting array data
+                        else{
+                            for (let index = 0; index < humDataList.length - 1; index++) {
+                                humDataList[index] = humDataList[index + 1];
+                                temDataList[index] = temDataList[index + 1];
+                                timeDataList[index] = timeDataList[index + 1];
+                                humDataList[humDataList.length-1] = hum;
+                                temDataList[temDataList.length-1] = tem;
+                                timeDataList[timeDataList.length-1] = time;
 
-                    // resizing the day array and filling data
-                    if (humDayDataList.length <= dayGraphTableSize && temDayDataList.length <= dayGraphTableSize) {
-                        humDayDataList[humDayDataList.length-1] = hum;
-                        temDayDataList[temDayDataList.length-1] = tem;
-                        timeDayDataList[timeDayDataList.length-1] = time;
-                        humDayDataList.length++;
-                        temDayDataList.length++;
-                        timeDayDataList.length++;
-                        
-                    }
-                    // shifting array data
-                    else{
-                        for (let index = 0; index < humDayDataList.length - 1; index++) {
-                            humDayDataList[index] = humDayDataList[index + 1];
-                            temDayDataList[index] = temDayDataList[index + 1];
-                            timeDayDataList[index] = timeDayDataList[index + 1];
+                            }
+                        }
+
+                        // resizing the day array and filling data
+                        if (humDayDataList.length <= dayGraphTableSize && temDayDataList.length <= dayGraphTableSize) {
                             humDayDataList[humDayDataList.length-1] = hum;
                             temDayDataList[temDayDataList.length-1] = tem;
                             timeDayDataList[timeDayDataList.length-1] = time;
+                            humDayDataList.length++;
+                            temDayDataList.length++;
+                            timeDayDataList.length++;
+                            
+                        }
+                        // shifting array data
+                        else{
+                            for (let index = 0; index < humDayDataList.length - 1; index++) {
+                                humDayDataList[index] = humDayDataList[index + 1];
+                                temDayDataList[index] = temDayDataList[index + 1];
+                                timeDayDataList[index] = timeDayDataList[index + 1];
+                                humDayDataList[humDayDataList.length-1] = hum;
+                                temDayDataList[temDayDataList.length-1] = tem;
+                                timeDayDataList[timeDayDataList.length-1] = time;
 
+                            }
                         }
                     }
                 }
