@@ -1,0 +1,388 @@
+<!doctype html>
+<html>
+    <head> 
+        <meta charset="utf-8">
+        <!-- main page title -->
+        <title>RASPBERRY PI STATE VIEWER</title>
+        <!-- javascript library -->
+	    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+        <!-- chartjs library -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+        <!-- CSS -->
+        <style>
+            .chartContainer{
+                width : 500px;
+                height: auto;
+                border: 1px solid #555;
+                padding : 10px 10px 30px 10px;
+                border-radius:8px;
+                position:absolute;
+            }
+
+            .fixedLeft{
+                position:fixed;
+                top:205px;
+                left:0px;
+            }
+            .fixedRight{
+                position:fixed;
+                top:205px;
+                left:530px;
+            }
+
+
+        </style>
+    </head>
+    <body>
+        <!-- system name -->
+        <h1>KRICT LAB Web Manager </h1> <hr>
+
+        <!-- print tem & hum -->
+        <form>
+            <p><span id="date" style="color: black;"></span></p>
+            <p>Temperature: <span id="tem" style="color: rgb(255, 71, 71);"></span> °C</p>
+            <p>Humidity: <span id="hum" style="color: rgb(0, 119, 255);"></span> %</p>
+        </form>
+
+        <!-- print temp chart -->
+        <div class="chartContainer fixedLeft">
+            <canvas  id="tempChart" ></canvas>
+            <canvas  id="tempDayChart" ></canvas>
+        </div>
+        <!-- print humid chart -->
+        <div class="chartContainer fixedRight">
+            <canvas id="humidChart" ></canvas>
+            <canvas id="humDayChart" ></canvas>
+        </div>
+        
+
+        <!-- javascript -->
+        <script type=text/javascript>
+        var tem;
+        var hum;
+        var time;
+
+        // 120 ≒ 1 min 
+        var graphTableSize = 240;
+        var dayGraphTableSize = 7200;
+        var humDataList = new Array(graphTableSize);
+        var temDataList = new Array(graphTableSize);
+        var timeDataList = new Array(graphTableSize).fill('');
+        var humDayDataList = new Array(dayGraphTableSize);
+        var temDayDataList = new Array(dayGraphTableSize);
+        var timeDayDataList = new Array(dayGraphTableSize).fill('');
+
+        //chart val
+        var tempChart = $('#tempChart');
+        var tempDayChart = $('#tempDayChart');
+        var humidChart = $('#humidChart');
+        var humDayChart = $('#humDayChart');
+
+        //rendering temp chart
+        var tempChart = tempChart = new Chart(tempChart,{
+            type: 'line',
+            data:{
+                labels: timeDataList,
+                datasets:
+                [{
+                    borderColor: '#CC5566',
+                    borderWidth:1,
+                    pointRadius:0,
+                }],
+            },
+                
+            options:{
+                responsive: true,
+                scales:{
+                    x:{
+                        title:{
+                            display:true,
+                            align : 'center',
+                            text:'Time'
+                        },
+                        
+                    },
+                    y:{
+                        title:{
+                            display:true,
+                            text:'Temperature (°C)'
+                        },
+                        suggestedMin:21,
+                        suggestedMax:28,
+                        ticks:{
+                            stepSize:0.2
+                        },
+                    }
+                },
+                plugins: {
+                    title: {
+                        text: 'Temperature',
+                        display: true,
+                        font:{
+                            size:24,
+                        },
+                    },
+
+                    legend:{
+                        display:false
+                    },
+                },
+                animation : false
+                }
+            });
+
+        //rendering temp 1hour chart
+        var tempDayChart = tempDayChart = new Chart(tempDayChart,{
+            type: 'line',
+            data:{
+                labels: timeDayDataList,
+                datasets:
+                [{
+                    borderColor: '#CC5566',
+                    borderWidth:1,
+                    pointRadius:0,
+                }],
+            },
+                
+            options:{
+                responsive: true,
+                scales:{
+                    x:{
+                        title:{
+                            display:true,
+                            align : 'center',
+                            text:'Time'
+                        },
+                        
+                    },
+                    y:{
+                        title:{
+                            display:true,
+                            text:'Temperature (°C)'
+                        },
+                        suggestedMin:21,
+                        suggestedMax:28,
+                        ticks:{
+                            stepSize:0.2
+                        },
+                    }
+                },
+                plugins: {
+                    title: {
+                        text: '',
+                        display: true,
+                        font:{
+                            size:24,
+                        },
+                    },
+
+                    legend:{
+                        display:false
+                    },
+                },
+                animation : false
+                }
+            });
+
+
+        //rendering humid chart
+        var humidChart = humidChart = new Chart(humidChart,{
+            type: 'line',
+            data:{
+                labels: timeDataList,
+                datasets:
+                [{
+                    borderColor: '#2288CC',
+                    borderWidth:1,
+                    pointRadius:0,
+                }]
+            },
+            options:{
+                responsive: true,
+                scales:{
+                    x:{
+                        title:{
+                            display:true,
+                            align : 'center',
+                            text:'Time '
+                        },
+                    },
+                    y:{
+                        title:{
+                                display:true,
+                                text:'Humidity (%)',
+                            },
+                        suggestedMin:40,
+                        suggestedMax:85,
+                        ticks:{
+                            stepSize:1
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        text: 'Humidity',
+                        display: true,
+                        font:{
+                            size:24,
+                        }
+                    },
+                    legend:{
+                        display:false
+                    },
+                },
+                animation : false
+                }
+            });
+
+        //rendering hum 1hour chart
+        var humDayChart = humDayChart = new Chart(humDayChart,{
+            type: 'line',
+            data:{
+                labels: timeDayDataList,
+                datasets:
+                [{
+                    borderColor: '#2288CC',
+                    borderWidth:1,
+                    pointRadius:0,
+                }],
+            },
+                
+            options:{
+                responsive: true,
+                scales:{
+                    x:{
+                        title:{
+                            display:true,
+                            align : 'center',
+                            text:'Time'
+                        },
+                        
+                    },
+                    y:{
+                        title:{
+                            display:true,
+                            text:'Humidity (°C)'
+                        },
+                        suggestedMin:40,
+                        suggestedMax:85,
+                        ticks:{
+                            stepSize:1
+                        },
+                    }
+                },
+                plugins: {
+                    title: {
+                        text: '',
+                        display: true,
+                        font:{
+                            size:24,
+                        },
+                    },
+
+                    legend:{
+                        display:false
+                    },
+                },
+                animation : false
+                }
+            });
+
+        // call HT data from server
+        $(function callHT()
+        {
+            // ajax url
+            $.getJSON('/callHT', function(data)
+            {
+                $("#hum").text(data.hum);
+                $("#tem").text(data.tem);
+                $("#date").text(data.date);
+                hum = Number(data.hum);
+                tem = Number(data.tem);
+                time = data.time;
+                // if data type is only number
+                if(!isNaN(hum) && !isNaN(tem)){
+
+                    // resizing the array and filling data
+                    if (humDataList.length <= graphTableSize && temDataList.length <= graphTableSize) {
+                        humDataList[humDataList.length-1] = hum;
+                        temDataList[temDataList.length-1] = tem;
+                        timeDataList[timeDataList.length-1] = time;
+                        humDataList.length++;
+                        temDataList.length++;
+                        timeDataList.length++;
+                        
+                    }
+                    // shifting array data
+                    else{
+                        for (let index = 0; index < humDataList.length - 1; index++) {
+                            humDataList[index] = humDataList[index + 1];
+                            temDataList[index] = temDataList[index + 1];
+                            timeDataList[index] = timeDataList[index + 1];
+                            humDataList[humDataList.length-1] = hum;
+                            temDataList[temDataList.length-1] = tem;
+                            timeDataList[timeDataList.length-1] = time;
+
+                        }
+                    }
+
+                    // resizing the day array and filling data
+                    if (humDayDataList.length <= dayGraphTableSize && temDayDataList.length <= dayGraphTableSize) {
+                        humDayDataList[humDayDataList.length-1] = hum;
+                        temDayDataList[temDayDataList.length-1] = tem;
+                        timeDayDataList[timeDayDataList.length-1] = time;
+                        humDayDataList.length++;
+                        temDayDataList.length++;
+                        timeDayDataList.length++;
+                        
+                    }
+                    // shifting array data
+                    else{
+                        for (let index = 0; index < humDayDataList.length - 1; index++) {
+                            humDayDataList[index] = humDayDataList[index + 1];
+                            temDayDataList[index] = temDayDataList[index + 1];
+                            timeDayDataList[index] = timeDayDataList[index + 1];
+                            humDayDataList[humDayDataList.length-1] = hum;
+                            temDayDataList[temDayDataList.length-1] = tem;
+                            timeDayDataList[timeDayDataList.length-1] = time;
+
+                        }
+                    }
+                }
+                // set temperature data
+                tempChart.data.datasets[0].data = temDataList;
+                tempChart.data.labels.data = timeDataList;
+                tempDayChart.data.datasets[0].data = temDayDataList;
+                tempDayChart.data.labels.data = timeDayDataList;
+
+                // set humidity data
+                humidChart.data.datasets[0].data = humDataList;
+                humidChart.data.labels.data = timeDataList;
+                humDayChart.data.datasets[0].data = humDayDataList;
+                humDayChart.data.labels.data = timeDayDataList;
+
+                tempChart.update();
+                humidChart.update();
+                tempDayChart.update();
+                humDayChart.update();
+                
+                delete humDataList;
+                delete temDataList;
+                delete timeDataList;
+                delete humDayDataList;
+                delete temDayDataList;
+                delete timeDayDataList;
+
+                setTimeout(function(){
+					callHT();
+					},100);
+                });
+        }
+        );
+
+
+        
+
+        </script>
+    </body>
+</html>
