@@ -11,10 +11,10 @@ import adafruit_dht
 from flask import Flask, request, jsonify, render_template
 import copy
 
-humid = 60.0
-temp = 24.0
-prevHumid = 60.0
-prevTemp = 24.0
+humid = -1
+temp = -1
+prevHumid = -1
+prevTemp = -1
 prevTime = ''
 
 app = Flask(__name__)  
@@ -56,23 +56,9 @@ def callHT():
                 nowdate = ("%04d - %02d - %02d" % (now.tm_year, now.tm_mon, now.tm_mday)) 
                 nowtime = ("%02d:%02d:%02d" % (now.tm_hour, now.tm_min, now.tm_sec)) 
                 
-                
                 prevTime = nowtime
                 prevHumid = humid
                 prevTemp = temp
-
-                # data list
-                data = []
-                data.clear()
-                data.append(nowdate)
-                data.append(nowtime)
-                data.append(temp)
-                data.append(humid)
-                data.append(dt)
-                data.append(dh)
-                data.append(calibrated_temp)
-                data.append(calibrated_humid)
-                data.append(calibration_msg)
                 
                 # return to html
                 return jsonify(hum=humid, tem=temp, date=nowdate, time=nowtime)
